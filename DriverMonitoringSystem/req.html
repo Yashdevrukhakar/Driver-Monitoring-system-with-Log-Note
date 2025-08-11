@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Driver Monitoring System</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+            overflow-x: hidden;
+        }
+        
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+        }
+        
+        .alert-box {
+            animation: pulse 2s infinite;
+            border-left: 5px solid;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        .thermal-gradient {
+            background: linear-gradient(135deg, #070B34 0%, #1A1F4B 25%, #3C4B7A 50%, #6B8BBE 75%, #8FB2D9 100%);
+        }
+        
+        .blink-warning {
+            animation: blink 0.5s step-end infinite alternate;
+        }
+        
+        @keyframes blink {
+            50% { border-color: #f59e0b; }
+        }
+        
+        .pothole-indicator {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center mb-8 text-cyan-400">Advanced Driver Monitoring System</h1>
+        
+        <div class="dashboard-grid">
+            <!-- Driver Camera Feed -->
+            <div class="bg-gray-800 rounded-xl p-4 shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">Driver Monitoring</h2>
+                <div class="relative">
+                    <div id="camera-feed" class="w-full h-64 bg-gray-900 rounded-lg flex items-center justify-center">
+                        <img src="https://placehold.co/800x600" alt="Live feed from driver-facing camera showing driver's face and upper body" class="w-full h-full object-cover rounded-lg" />
+                    </div>
+                    <div id="face-overlay" class="absolute top-0 left-0 w-full h-full pointer-events-none"></div>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <h3 class="text-sm font-medium text-gray-300">Eye Status</h3>
+                        <p id="eye-status" class="text-lg font-bold text-green-400">NORMAL</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <h3 class="text-sm font-medium text-gray-300">Face Position</h3>
+                        <p id="face-position" class="text-lg font-bold text-green-400">CENTRED</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <h3 class="text-sm font-medium text-gray-300">Blink Rate</h3>
+                        <p id="blink-rate" class="text-lg font-bold text-green-400">15 BPM</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <h3 class="text-sm font-medium text-gray-300">Attention</h3>
+                        <p id="attention-level" class="text-lg font-bold text-green-400">HIGH</p>
+                    </div>
+                </div>
+                <div id="drowsiness-alert" class="hidden mt-4 p-3 rounded-lg bg-amber-900 alert-box border-l-amber-400">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="font-medium">DROWSINESS DETECTED! Please take a break.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Thermal Imaging -->
+            <div class="bg-gray-800 rounded-xl p-4 shadow-lg">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">Thermal Imaging</h2>
+                <div class="thermal-gradient w-full h-64 rounded-lg relative overflow-hidden">
+                    <img src="https://placehold.co/800x600" alt="Thermal imaging of driver's face showing temperature variations" class="w-full h-full object-cover opacity-70" />
+                    <div class="absolute bottom-0 left-0 w-full p-3 bg-black bg-opacity-50">
+                        <div class="flex justify-between items-center">
+                            <span class="text-sm font-medium">Face Temperature</span>
+                            <span id="face-temperature" class="text-lg font-bold">36.2°C</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 grid grid-cols-2 gap-4">
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <h3 class="text-sm font-medium text-gray-300">Alcohol Detection</h3>
+                        <p id="alcohol-level" class="text-lg font-bold text-green-400">NORMAL</p>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-3">
+                        <h3 class="text-sm font-medium text-gray-300">Phone Usage</h3>
+                        <p id="phone-usage" class="text-lg font-bold text-green-400">NOT DETECTED</p>
+                    </div>
+                </div>
+                <div id="alcohol-alert" class="hidden mt-4 p-3 rounded-lg bg-red-900 alert-box border-l-red-400">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="font-medium">ALCOHOL DETECTED! Pull over immediately.</p>
+                    </div>
+                </div>
+                <div id="phone-alert" class="hidden mt-4 p-3 rounded-lg bg-purple-900 alert-box border-l-purple-400">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="font-medium">PHONE USAGE DETECTED! Keep your hands on the wheel.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Pothole Detection -->
+            <div class="bg-gray-800 rounded-xl p-4 shadow-lg col-span-2">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">Road Condition Monitoring</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="col-span-2">
+                        <div class="relative">
+                            <div id="road-camera" class="w-full h-64 bg-gray-900 rounded-lg flex items-center justify-center">
+                                <img src="https://placehold.co/1600x900" alt="Forward-facing road view from vehicle camera showing upcoming road conditions" class="w-full h-full object-cover rounded-lg" />
+                            </div>
+                            <div id="pothole-indicator" class="absolute top-0 left-0 w-12 h-12 bg-red-500 rounded-full flex items-center justify-center text-white font-bold shadow-lg transform translate-x-1/2 translate-y-1/2 hidden">
+                                !
+                            </div>
+                        </div>
+                        <div class="mt-4 grid grid-cols-3 gap-4">
+                            <div class="bg-gray-700 rounded-lg p-3">
+                                <h3 class="text-sm font-medium text-gray-300">Potholes Detected</h3>
+                                <p id="pothole-count" class="text-lg font-bold text-green-400">0</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-3">
+                                <h3 class="text-sm font-medium text-gray-300">Road Quality</h3>
+                                <p id="road-quality" class="text-lg font-bold text-green-400">GOOD</p>
+                            </div>
+                            <div class="bg-gray-700 rounded-lg p-3">
+                                <h3 class="text-sm font-medium text-gray-300">Last Detection</h3>
+                                <p id="last-detection" class="text-lg font-bold">--:--</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-3 text-cyan-300">Pothole Log</h3>
+                        <div id="pothole-log" class="h-48 overflow-y-auto space-y-2">
+                            <div class="text-sm p-2 bg-gray-600 rounded">No potholes detected yet</div>
+                        </div>
+                    </div>
+                </div>
+                <div id="pothole-alert" class="hidden mt-4 p-3 rounded-lg bg-yellow-900 alert-box border-l-yellow-400">
+                    <div class="flex items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-yellow-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <p class="font-medium">POTHLE DETECTED AHEAD! Slow down and proceed with caution.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- System Controls -->
+            <div class="bg-gray-800 rounded-xl p-4 shadow-lg col-span-2">
+                <h2 class="text-xl font-semibold mb-4 text-cyan-300">System Controls</h2>
+                <div class="grid grid-cols-3 gap-4">
+                    <div class="bg-gray-700 rounded-lg p-4">
+                        <h3 class="text-lg font-semibold mb-3 text-cyan-300">Reset System</h3>
+                        <p class="text-sm mb-4">Place your palm in front of the camera to reset all alerts</p>
+                        <div class="flex justify-center">
+                            <button id="reset-btn" class="px-6 py-2 bg-red-600 hover:bg-red-700 rounded-lg font-medium flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2
